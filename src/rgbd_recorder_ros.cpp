@@ -51,7 +51,7 @@ const string param_video_num = "/video_num";
 int video_num = 0;
 
 const string param_save_path = "path";
-string save_path = "/home/omnisky/rgbd_video/";
+string save_path = "/home/omnisky/rgbd_video";
 
 const string param_frame_num = "frame_num";
 int frame_num = 100; // total frame captured for each video
@@ -128,9 +128,10 @@ int main(int argc, char **argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
+  ros::NodeHandle prnh("~");
 
-  pnh.getParam(param_save_path, save_path);
-  pnh.getParam(param_delay, delay);
+  prnh.getParam(param_save_path, save_path);
+  prnh.getParam(param_delay, delay);
 
   // listen to the image topics
   int queueSize = 5;
