@@ -50,13 +50,13 @@ message_filters::Synchronizer<MyApproxSyncDepthPolicy> * approxSyncDepth_;
 const string param_video_num = "/video_num";
 int video_num = 0;
 
-const string param_save_path = "/path";
+const string param_save_path = "path";
 string save_path = "/home/omnisky/rgbd_video/";
 
-const string param_frame_num = "/frame_num";
+const string param_frame_num = "frame_num";
 int frame_num = 100; // total frame captured for each video
 
-const string param_delay = "/delay";
+const string param_delay = "delay";
 int delay = 30; // ms
 
 int idx = 0;
@@ -66,7 +66,10 @@ void depthCallback(
     const sensor_msgs::ImageConstPtr& imageDepth,
     const sensor_msgs::CameraInfoConstPtr& cameraInfo)
 {
-  if (idx > frame_num) return;
+  if (idx > frame_num) {
+    ROS_WARN_THROTTLE(1000, "Video %d has been recorded.", video_num);
+    return;
+  }
 
   cv_bridge::CvImagePtr imagePtr;
   if(image->encoding.compare(sensor_msgs::image_encodings::TYPE_8UC1) == 0)
@@ -98,8 +101,8 @@ void depthCallback(
     if (delay > 0) cv::waitKey(delay);
 
     // Standard order of DAVIS dataset: /DAVIS/RGB/Categories
-    string rgb_file = save_path + "/rgb/" + to_string(video_num);
-    string depth_file = save_path + "/depth/" + to_string(video_num);
+    string rgb_file = save_path + "/rgb/" + to_string(video_num) + "/";
+    string depth_file = save_path + "/depth/" + to_string(video_num) + "/";
 
     if (!boost::filesystem::is_directory(rgb_file))
       boost::filesystem::create_directories(rgb_file);
@@ -130,7 +133,7 @@ int main(int argc, char **argv)
   pnh.getParam(param_delay, delay);
 
   // listen to the image topics
-  int queueSize = 20;
+  int queueSize = 5;
   image_transport::SubscriberFilter imageSub_;
   image_transport::SubscriberFilter imageDepthSub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> cameraInfoSub_;
