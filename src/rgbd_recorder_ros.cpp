@@ -67,7 +67,7 @@ void depthCallback(
     const sensor_msgs::CameraInfoConstPtr& cameraInfo)
 {
   if (idx > frame_num) {
-    ROS_WARN_THROTTLE(1000, "Video %d has been recorded.", video_num);
+    ROS_WARN_THROTTLE(10, "Video %d has been recorded.", video_num);
     return;
   }
 

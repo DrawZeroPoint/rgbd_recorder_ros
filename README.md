@@ -21,11 +21,11 @@
 
  `roslaunch rgbd_recorder_ros recorder.launch`
 
- Before you run this, make sure the 'path' is set correctly, and in that path your captured video will be stored.
+ Before you run this, make sure the 'path' is set correctly, in where the captured videos are stored.
 
 3. Use ros_param "/video_num" to get new videos:
 
  `rosparam set /video_num VALUE`
 
-  where VALUE need to be given by user, which start with 1. After one video was recorded, you can only increase VALUE by 1
+  where VALUE need to be given by user, which starts with 1. After one video was recorded, it's recommanded increasing the VALUE by 1
 

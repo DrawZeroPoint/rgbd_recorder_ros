@@ -1,7 +1,7 @@
 <launch>
 
   <node pkg="rgbd_recorder_ros" type="rgbd_recorder_ros" name="rgbd_recorder_ros" output="screen">
-    <param name="path" value="/home/omnisky/rgbd_video"/>
+    <param name="path" value="$(find rgbd_recorder_ros)/rgbd_video"/>
     <param name="frame_num" value="100"/>
     <param name="delay" value="10"/>
   </node>
