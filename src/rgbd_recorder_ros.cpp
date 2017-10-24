@@ -59,9 +59,15 @@ int frame_num = 100; // total frame captured for each video
 const string param_delay = "delay";
 int delay = 30; // ms
 
+const string param_gain = "gain";
+int gain = 20; // multiply depth value
+
 int idx = 0;
 
-void depthCallback(
+cv_bridge::CvImagePtr imagePtr;
+cv_bridge::CvImagePtr imageDepthPtr;
+
+void imageCallback(
     const sensor_msgs::ImageConstPtr& image,
     const sensor_msgs::ImageConstPtr& imageDepth,
     const sensor_msgs::CameraInfoConstPtr& cameraInfo)
@@ -71,7 +77,6 @@ void depthCallback(
     return;
   }
 
-  cv_bridge::CvImagePtr imagePtr;
   if(image->encoding.compare(sensor_msgs::image_encodings::TYPE_8UC1) == 0)
   {
     imagePtr = cv_bridge::toCvCopy(image);
@@ -86,7 +91,7 @@ void depthCallback(
     imagePtr = cv_bridge::toCvCopy(image, "bgr8");
   }
 
-  cv_bridge::CvImagePtr imageDepthPtr = cv_bridge::toCvCopy(imageDepth);
+  imageDepthPtr = cv_bridge::toCvCopy(imageDepth);
 
   image_geometry::PinholeCameraModel model;
   model.fromCameraInfo(*cameraInfo);
@@ -97,9 +102,6 @@ void depthCallback(
 
   bool save_images = true; // TODO: make this as a option in dynamic configure
   if (save_images) {
-
-    if (delay > 0) cv::waitKey(delay);
-
     // Standard order of DAVIS dataset: /DAVIS/RGB/Categories
     string rgb_file = save_path + "/rgb/" + to_string(video_num) + "/";
     string depth_file = save_path + "/depth/" + to_string(video_num) + "/";
@@ -114,7 +116,7 @@ void depthCallback(
     ss << std::setfill('0') << std::setw(5) << idx; // pad idx with 5 leading zeros
 
     cv::imwrite(rgb_file + ss.str() + ".png", imagePtr->image);
-    cv::imwrite(depth_file + ss.str() + ".png", imageDepthPtr->image);
+    cv::imwrite(depth_file + ss.str() + ".png", imageDepthPtr->image * gain);
     idx++;
   }
 
@@ -155,7 +157,7 @@ int main(int argc, char **argv)
 
   approxSyncDepth_ = new message_filters::Synchronizer<MyApproxSyncDepthPolicy>
       (MyApproxSyncDepthPolicy(queueSize), imageSub_, imageDepthSub_, cameraInfoSub_);
-  approxSyncDepth_->registerCallback(depthCallback);
+  approxSyncDepth_->registerCallback(imageCallback);
 
   ROS_INFO("RGBD recorder initialized.\n");
 
@@ -170,6 +172,14 @@ int main(int argc, char **argv)
       }
     }
     ros::spinOnce();
+
+    if (delay > 0) {
+      if (imagePtr != NULL && imageDepthPtr != NULL) {
+        cv::imshow("rgb", imagePtr->image);
+        cv::imshow("depth", imageDepthPtr->image * gain);
+        cv::waitKey(delay);
+      }
+    }
   }
 
   return 0;
